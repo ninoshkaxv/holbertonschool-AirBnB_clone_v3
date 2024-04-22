@@ -9,6 +9,7 @@ from models.user import User
 from models.state import State
 from models.amenity import Amenity
 
+
 @app_views.route('/cities/<city_id>/places', methods=['GET'],
                  strict_slashes=False)
 def retrieve_places(city_id):
@@ -22,6 +23,7 @@ def retrieve_places(city_id):
         place_list.append(place.to_dict())
     return jsonify(place_list)
 
+
 @app_views.route('/places/<place_id>', methods=['GET'], strict_slashes=False)
 def get_place(place_id):
     """Return a Place object based on its id"""
@@ -29,6 +31,7 @@ def get_place(place_id):
     if place is None:
         abort(404)
     return jsonify(place.to_dict())
+
 
 @app_views.route('/places/<place_id>', methods=['DELETE'],
                  strict_slashes=False)
@@ -40,6 +43,7 @@ def delete_place(place_id):
     storage.delete(place)
     storage.save()
     return make_response(jsonify({}), 200)
+
 
 @app_views.route('/cities/<city_id>/places', methods=['POST'],
                  strict_slashes=False)
@@ -64,6 +68,7 @@ def create_place(city_id):
     new_place.save()
     return make_response(jsonify(new_place.to_dict()), 201)
 
+
 @app_views.route('/places/<place_id>', methods=['PUT'], strict_slashes=False)
 def update_place(place_id):
     """Updates a Place object"""
@@ -79,6 +84,7 @@ def update_place(place_id):
     place.save()
     return make_response(jsonify(place.to_dict()), 200)
 
+
 @app_views.route('/places_search', methods=['POST'], strict_slashes=False)
 def search_places():
     """Searches for places"""
@@ -87,11 +93,13 @@ def search_places():
         abort(400, 'Not a JSON')
     places = storage.all(Place).values()
     if 'states' in data:
-        places = [place for place in places if place.city.state_id in data['states']]
+        places = [
+            place for place in places if place.city.state_id in data['states']]
     if 'cities' in data:
         places = [place for place in places if place.city_id in data['cities']]
     if 'amenities' in data:
-        places = [place for place in places if data['amenities'] <= set([amenity.id for amenity in place.amenities])]
+        places = [place for place in places if data['amenities']
+                  <= set([amenity.id for amenity in place.amenities])]
     place_list = []
     for place in places:
         place_list.append(place.to_dict())
