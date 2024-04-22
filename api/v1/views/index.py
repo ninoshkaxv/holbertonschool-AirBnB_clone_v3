@@ -1,33 +1,24 @@
 #!/usr/bin/python3
-"""index.py to connect to API"""
+""" Provides status of our Flask instance route of 'app' """
 from api.v1.views import app_views
-from flask import Flask, Blueprint, jsonify
 from models import storage
+from flask import jsonify
 
 
-hbnbText = {
-    "amenities": "Amenity",
-    "cities": "City",
-    "places": "Place",
-    "reviews": "Review",
-    "states": "State",
-    "users": "User"
-}
-
-
-@app_views.route('/status', strict_slashes=False)
-def hbnbStatus():
-    """hbnbStatus"""
+@app_views.route("/status")
+def app_status():
+    """ App status if successful """
     return jsonify({"status": "OK"})
 
 
-@app_views.route('/stats', strict_slashes=False)
-def hbnbStats():
-    """hbnbStats"""
-    return_dict = {}
-    for key, value in hbnbText.items():
-        return_dict[key] = storage.count(value)
-    return jsonify(return_dict)
-
-if __name__ == "__main__":
-    pass
+@app_views.route("/stats")
+def cool_stats():
+    """ Endpoint that retrieves the number of each objects by type """
+    return jsonify({
+        "amenities": storage.count("Amenity"),
+        "cities": storage.count("City"),
+        "places": storage.count("Place"),
+        "reviews": storage.count("Review"),
+        "states": storage.count("State"),
+        "users": storage.count("User")
+    })
