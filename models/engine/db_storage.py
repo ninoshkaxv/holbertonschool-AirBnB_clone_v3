@@ -40,12 +40,30 @@ class DBStorage:
         if HBNB_ENV == "test":
             Base.metadata.drop_all(self.__engine)
 
+    def get(self, cls, id):
+        """retrieve one object and return it, None if not found"""
+        if cls in classes.values():
+            obj = self.__session.query(cls).get(id)
+            if obj:
+                return obj
+        return None
+
+    def count(self, cls=None):
+        """return number of objects in storage of the given class"""
+        classList = classes.values()
+        if cls is not None:
+            classList = [cls]
+        count = 0
+        for each_class in classList:
+            count = count + self.__session.query(each_class).count()
+        return count
+
     def all(self, cls=None):
         """query on the current database session"""
         new_dict = {}
-        for clss in classes:
-            if cls is None or cls is classes[clss] or cls is clss:
-                objs = self.__session.query(classes[clss]).all()
+        for each_class in classes:
+            if cls is None or cls is classes[each_class] or cls is each_class:
+                objs = self.__session.query(classes[each_class]).all()
                 for obj in objs:
                     key = obj.__class__.__name__ + '.' + obj.id
                     new_dict[key] = obj
@@ -70,24 +88,6 @@ class DBStorage:
         sess_factory = sessionmaker(bind=self.__engine, expire_on_commit=False)
         Session = scoped_session(sess_factory)
         self.__session = Session
-
-    def get(self, cls, id):
-        """retrieves one object"""
-        if (cls is not None):
-            result = self.all(cls)
-            if (result == {}):
-                return (None)
-            class_name = cls.__name__
-            key = '{}.{}'.format(class_name, id)
-
-            return (result.get(key, None))
-        return (None)
-
-    def count(self, cls=None):
-        """"counts the number of objects in storage"""
-        count = len(self.all())
-        return count
-        
 
     def close(self):
         """call remove() method on the private session attribute"""

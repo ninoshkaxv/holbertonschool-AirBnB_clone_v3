@@ -34,6 +34,25 @@ class FileStorage:
             return new_dict
         return self.__objects
 
+    def get(self, cls, id):
+        """return the object based on given id, None if not fount"""
+        if cls in classes.values():
+            obj = self.all(cls)
+            for key, value in obj.items():
+                if key == cls.__name__ + '.' + id:
+                    return value
+        return None
+
+    def count(self, cls=None):
+        """return the number of objects in storage of the given class"""
+        classList = classes.values()
+        if cls is not None:
+            classList = [cls]
+        count = 0
+        for each_class in classList:
+            count = count + len(self.all(each_class))
+        return count
+
     def new(self, obj):
         """sets in __objects the obj with key <obj class name>.id"""
         if obj is not None:
@@ -55,7 +74,7 @@ class FileStorage:
                 jo = json.load(f)
             for key in jo:
                 self.__objects[key] = classes[jo[key]["__class__"]](**jo[key])
-        except:
+        except Exception:
             pass
 
     def delete(self, obj=None):
@@ -64,27 +83,6 @@ class FileStorage:
             key = obj.__class__.__name__ + '.' + obj.id
             if key in self.__objects:
                 del self.__objects[key]
-
-    def close(self):
-        """call reload() method for deserializing the JSON file to objects"""
-        self.reload()
-
-    def get(self, cls, id):
-        """retrieves one object"""
-        if (cls is not None):
-            result = self.all(cls)
-            if (result == {}):
-                return (None)
-            class_name = cls.__name__
-            key = '{}.{}'.format(class_name, id)
-
-            return (result.get(key, None))
-        return (None)
-
-    def count(self, cls=None):
-        """"counts the number of objects in storage"""
-        count = len(self.all())
-        return count
 
     def close(self):
         """call reload() method for deserializing the JSON file to objects"""
